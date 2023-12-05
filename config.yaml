@@ -1,0 +1,4 @@
+bind_addr: "127.0.0.1:8080"
+database:
+    path:     "./db.sqlite3"
+jwt_key:   "secretissecretbutsecretisnotsecure"
