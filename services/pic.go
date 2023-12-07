@@ -24,11 +24,10 @@ import (
 
 // @Summary upload pic
 // @Tags pic
-// @Accept picfile
+// @Accept mpfd
 // @Produce json
 // @router /pic/create [post]
-// @Success 200 {object} Pic{data=models.Pic}
-
+// @Success 200 {object} web.Pic{data=models.Pic}
 func UploadPic(c *fiber.Ctx) error {
 
 	uId := c.Locals("sub")
@@ -100,13 +99,13 @@ func UploadPic(c *fiber.Ctx) error {
 	})
 }
 
-//@Summary delete user pic
-//@Tags pic
-//@Accept json
-//@Produce json
-//@router /pic/delete/{uuid} [get]
-//@Success 200 {object} Pic{data=models.Pic}
-
+// @Summary delete user pic
+// @Tags pic
+// @Accept json
+// @Produce json
+// @Param uuid path string true "picture uuid"
+// @router /pic/delete/{uuid} [get]
+// @Success 200 {object} web.Pic{data=models.Pic}
 func DeleteUserPic(c *fiber.Ctx) error {
 	uId := c.Locals("sub").(uint)
 	pId := c.Params("uuid")
@@ -146,13 +145,12 @@ func DeleteUserPic(c *fiber.Ctx) error {
 	})
 }
 
-//@Summary Get user pic
-//@Tags pic
-//@Accept json
-//@Produce json
-//@router /pic/list/ [get]
-//@Success 200 {object} Pic{data=[]models.Pic}
-
+// @Summary Get user pic
+// @Tags pic
+// @Accept json
+// @Produce json
+// @router /pic/list/ [get]
+// @Success 200 {object} web.Pic{data=[]models.Pic}
 func GetUserPic(c *fiber.Ctx) error {
 	uId := c.Locals("sub").(uint)
 

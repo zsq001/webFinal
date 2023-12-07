@@ -52,7 +52,6 @@ func SaveJWTtoLocal(c *fiber.Ctx) error {
 // @Failure 500 {object} wb.User{data=int}
 // @Router /api/v1/user/login [post]
 // @tags user
-
 func Login(c *fiber.Ctx) error {
 	user := c.FormValue("user")
 	pass := c.FormValue("pass")
@@ -96,8 +95,18 @@ func Login(c *fiber.Ctx) error {
 	})
 }
 
-// @Summary register
-
+// @Summary Register
+// @description Register api
+// @description user can register with name
+// @Param user formData string true "user name"
+// @Param pass formData string true "user password"
+// @Produce json
+// @Success 200 {object} wb.User{data=string}
+// @Failure 400 {object} wb.User{data=int}
+// @Failure 401 {object} wb.User{data=int}
+// @Failure 500 {object} wb.User{data=int}
+// @Router /api/v1/user/register [post]
+// @tags user
 func Register(c *fiber.Ctx) error {
 	name := c.FormValue("user")
 	pass := c.FormValue("pass")

@@ -25,10 +25,10 @@ func FindUserNameById(id uint) string {
 // @description message api
 // @description user can send msg with name
 // @Produce json
-// @Success 200 {object} wb.Msg{data=string}
+// @Success 200 {object} mw.Msg{data=string}
+// @Param tid path string true "target id"
 // @Router /api/v1/msg/v1/send/{tid} [post]
 // @tags msg
-
 func SendMsg(c *fiber.Ctx) error {
 	uid := c.Locals("sub").(uint)
 	tid, err := strconv.ParseUint(c.Params("tid"), 10, 64)
@@ -76,10 +76,10 @@ func SendMsg(c *fiber.Ctx) error {
 // @description message api
 // @description user can get exist msg with target id
 // @Produce json
-// @Success 200 {object} wb.Msg{data=string}
+// @Success 200 {object} mw.Msg{data=string}
+// @Param tid path string true "target id"
 // @Router /api/v1/msg/v1/get/{tid} [get]
 // @tags msg
-
 func GetMsgs(c *fiber.Ctx) error {
 	uid := c.Locals("sub").(uint)
 	tid, err := strconv.ParseUint(c.Params("tid"), 10, 64)
@@ -117,10 +117,9 @@ func GetMsgs(c *fiber.Ctx) error {
 // @description message api
 // @description user can get exist msg list
 // @Produce json
-// @Success 200 {object} wb.Msg{data=string}
+// @Success 200 {object} mw.Msg{data=string}
 // @Router /api/v1/msg/v1/list [get]
 // @tags msg
-
 func ListMsgs(c *fiber.Ctx) error {
 	uid := c.Locals("sub").(uint)
 
@@ -173,10 +172,10 @@ func ListMsgs(c *fiber.Ctx) error {
 // @description message api
 // @description user can delete exist msg with message id
 // @Produce json
-// @Success 200 {object} wb.Msg{data=string}
-// @Router /api/v1/msg/v1/delete/:tid [get]
+// @Success 200 {object} mw.Msg{data=string}
+// @Param tid path string true "target id"
+// @Router /api/v1/msg/v1/delete/{tid} [get]
 // @tags msg
-
 func DeleteMsg(c *fiber.Ctx) error {
 	uid := c.Locals("sub").(uint)
 	mid, err := strconv.ParseUint(c.Params("mid"), 10, 64)
@@ -225,10 +224,10 @@ func DeleteMsg(c *fiber.Ctx) error {
 // @description message api
 // @description user can recall msg sent in 10 minutes
 // @Produce json
-// @Success 200 {object} wb.Msg{data=string}
-// @Router /api/v1/msg/v1/recall/:tid [get]
+// @Param tid path string true "target id"
+// @Success 200 {object} mw.Msg{data=string}
+// @Router /api/v1/msg/v1/recall/{tid} [get]
 // @tags msg
-
 func RecallMsg(c *fiber.Ctx) error {
 	uid := c.Locals("sub").(uint)
 	mid, err := strconv.ParseUint(c.Params("mid"), 10, 64)

@@ -13,8 +13,15 @@ import (
 	"webFinal/config"
 	"webFinal/database"
 	"webFinal/routers"
+
+	_ "webFinal/docs"
 )
 
+// @title webFinal API
+// @version 1.0
+// @license.name GPL 3.0
+// @host localhost:8080
+// @BasePath /
 func main() {
 	// read config
 	if err := config.ReadConfig("./config.yaml"); err != nil {
