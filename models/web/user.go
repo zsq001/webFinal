@@ -11,3 +11,9 @@ type User struct {
 	Errors string      `json:"error,omitempty"`
 	Data   interface{} `json:"data,omitempty"`
 }
+
+type UserInfo struct {
+	ID       uint   `json:"id"`
+	Username string `json:"name"`
+	Role     string `json:"role"`
+}

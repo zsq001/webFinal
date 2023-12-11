@@ -29,20 +29,20 @@ func DeletePicViaUid(uid uint) error {
 	return database.DB.Where("user_id = ?", uid).Delete(&p).Error
 }
 
-func FindUserPic(uid uint) ([]models.Pic, error) {
-	var p []models.Pic
-	if err := database.DB.Where("user_id = ?", uid).Find(&p).Error; err != nil {
-		return nil, err
-	}
-	return p, nil
-}
+//func FindUserPic(uid uint) ([]models.Pic, error) {
+//	var p []models.Pic
+//	if err := database.DB.Where("user_id = ?", uid).Find(&p).Error; err != nil {
+//		return nil, err
+//	}
+//	return p, nil
+//}
 
-//@Summary get user info
-//@Tags user
-//@Produce json
-//@router /user/info/{id} [get]
-//@Success 200 {object} User{data=models.User}
-
+// @Summary get user info
+// @Tags user
+// @Produce json
+// @Param id path string true "user id"
+// @router /user/info/{id} [get]
+// @Success 200 {object} web.User{data=web.UserInfo}
 func GetUserInfo(c *fiber.Ctx) error {
 	targetId := c.Params("id")
 
@@ -57,6 +57,8 @@ func GetUserInfo(c *fiber.Ctx) error {
 
 	var user models.User
 
+	var result web.UserInfo
+
 	if err := database.DB.Where("id = ?", targetId).First(&user).Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(web.User{
 			Status: fiber.StatusNotFound,
@@ -64,18 +66,22 @@ func GetUserInfo(c *fiber.Ctx) error {
 		})
 	}
 
+	result.Role = strconv.FormatInt(int64(user.Role), 10)
+	result.Username = user.Name
+	result.ID = user.ID
+
 	return c.Status(fiber.StatusOK).JSON(web.User{
 		Status: fiber.StatusOK,
-		Data:   user,
+		Data:   result,
 	})
 }
 
-//@Summary Update user info
-//@Tags user
-//@Produce json
-//@router /user/info/{id} [post]
-//@Success 200 {object} User{data=models.User}
-
+// @Summary Update user info
+// @Tags user
+// @Produce json
+// @Param id path string true "user id"
+// @router /user/info/{id} [post]
+// @Success 200 {object} web.User{data=web.UserInfo}
 func UpdateUserInfo(c *fiber.Ctx) error {
 	targetId := c.Params("id")
 
@@ -89,6 +95,8 @@ func UpdateUserInfo(c *fiber.Ctx) error {
 	}
 
 	var user models.User
+
+	var result web.UserInfo
 
 	if err := database.DB.Where("id = ?", targetId).First(&user).Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(web.User{
@@ -111,20 +119,24 @@ func UpdateUserInfo(c *fiber.Ctx) error {
 		})
 	}
 
+	result.Role = strconv.FormatInt(int64(user.Role), 10)
+	result.Username = user.Name
+	result.ID = user.ID
+
 	return c.Status(fiber.StatusOK).JSON(web.User{
 		Status: fiber.StatusOK,
-		Data:   user,
+		Data:   result,
 	})
 }
 
-//@Summary list all user info (admin only)
-//@Tags user
-//@Produce json
-//@router /user/list [get]
-//@Success 200 {object} User{data=models.User}
-
+// @Summary list all user info (admin only)
+// @Tags user
+// @Produce json
+// @router /user/list [get]
+// @Success 200 {object} []web.User{data=web.UserInfo}
 func GetUserList(c *fiber.Ctx) error {
 	var users []models.User
+	var result []web.UserInfo
 
 	if c.Locals("role").(models.UserRole) != models.Admin {
 		return c.Status(fiber.StatusUnauthorized).JSON(web.User{
@@ -140,21 +152,23 @@ func GetUserList(c *fiber.Ctx) error {
 		})
 	}
 	for i := range users {
-		users[i].Pics, _ = FindUserPic(users[i].ID)
+		result[i].Role = strconv.FormatInt(int64(users[i].Role), 10)
+		result[i].Username = users[i].Name
+		result[i].ID = users[i].ID
 	}
 
 	return c.Status(fiber.StatusOK).JSON(web.User{
 		Status: fiber.StatusOK,
-		Data:   users,
+		Data:   result,
 	})
 }
 
-//@Summary delete user (admin only)
-//@Tags user
-//@Produce json
-//@router /user/delete/{id} [get]
-//@Success 200 {"success"}
-
+// @Summary delete user (admin only)
+// @Tags user
+// @Produce json
+// @Param id path string true "user id"
+// @router /user/delete/{id} [get]
+// @Success 200 {string} string "success"
 func DeleteUser(c *fiber.Ctx) error {
 	targetId := c.Params("id")
 

@@ -51,6 +51,15 @@ definitions:
       status:
         type: integer
     type: object
+  web.UserInfo:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      role:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact: {}
@@ -364,4 +373,86 @@ paths:
       summary: Get user pic
       tags:
       - pic
+  /user/delete/{id}:
+    get:
+      parameters:
+      - description: user id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            type: string
+      summary: delete user (admin only)
+      tags:
+      - user
+  /user/info/{id}:
+    get:
+      parameters:
+      - description: user id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/web.User'
+            - properties:
+                data:
+                  $ref: '#/definitions/web.UserInfo'
+              type: object
+      summary: get user info
+      tags:
+      - user
+    post:
+      parameters:
+      - description: user id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/web.User'
+            - properties:
+                data:
+                  $ref: '#/definitions/web.UserInfo'
+              type: object
+      summary: Update user info
+      tags:
+      - user
+  /user/list:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              allOf:
+              - $ref: '#/definitions/web.User'
+              - properties:
+                  data:
+                    $ref: '#/definitions/web.UserInfo'
+                type: object
+            type: array
+      summary: list all user info (admin only)
+      tags:
+      - user
 swagger: "2.0"

@@ -8,6 +8,7 @@ package main
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/swagger"
 	"github.com/sirupsen/logrus"
 	"webFinal/config"
@@ -36,11 +37,16 @@ func main() {
 
 	app := fiber.New(fiber.Config{})
 
+	app.Use(cors.New())
+
 	routers.InitRouter(app)
 
 	app.Get("/swagger/*", swagger.HandlerDefault)
 
 	app.Static("/img", "./static")
 
-	app.Listen(config.CONFIG.BindAddr)
+	if err := app.Listen(config.CONFIG.BindAddr); err != nil {
+		logrus.Error("Failed to listen")
+		logrus.Panic(err)
+	}
 }

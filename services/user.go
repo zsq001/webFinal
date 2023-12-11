@@ -110,6 +110,11 @@ func Login(c *fiber.Ctx) error {
 func Register(c *fiber.Ctx) error {
 	name := c.FormValue("user")
 	pass := c.FormValue("pass")
+	if name == "" || pass == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "user or pass is empty",
+		})
+	}
 	var UserObject models.User
 	UserObject.Name = name
 	UserObject.Password = pass // For homework only, DO NOT USE IN PRODUCTION
