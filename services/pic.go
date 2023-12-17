@@ -175,3 +175,31 @@ func GetUserPic(c *fiber.Ctx) error {
 		Data:   pictures,
 	})
 }
+
+// @Summary Download pic
+// @Tags pic
+// @Accept json
+// @router /pic/download/{uuid} [get]
+// @Success 200 {formData} file
+func DownloadPic(c *fiber.Ctx) error {
+	uId := c.Locals("sub").(uint)
+	pId := c.Params("uuid")
+
+	var pic models.Pic
+
+	if err := db.DB.Where("uuid = ?", pId).First(&pic).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(web.Pic{
+			Status: fiber.StatusInternalServerError,
+			Errors: "Image not found",
+		})
+	}
+
+	if pic.UserID != uId && c.Locals("role").(models.UserRole) != models.Admin {
+		return c.Status(fiber.StatusForbidden).JSON(web.Pic{
+			Status: fiber.StatusForbidden,
+			Errors: "Permission denied",
+		})
+	}
+
+	return c.SendFile("./static/" + pic.UUID)
+}

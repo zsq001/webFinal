@@ -17,6 +17,6 @@ func SetupMsgRouterv1(r fiber.Router) {
 	msg.Get("/get/:tid", services.GetMsgs)
 	msg.Post("/send/:tid", services.SendMsg)
 	msg.Get("/list", services.ListMsgs)
-	msg.Get("/delete/:tid", services.DeleteMsg)
-	msg.Get("/recall/:tid", services.RecallMsg)
+	msg.Get("/delete/:mid", services.DeleteMsg)
+	msg.Get("/recall/:mid", services.RecallMsg)
 }

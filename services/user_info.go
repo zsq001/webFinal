@@ -7,6 +7,7 @@
 package services
 
 import (
+	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"os"
 	"strconv"
@@ -45,15 +46,6 @@ func DeletePicViaUid(uid uint) error {
 // @Success 200 {object} web.User{data=web.UserInfo}
 func GetUserInfo(c *fiber.Ctx) error {
 	targetId := c.Params("id")
-
-	uId := c.Locals("sub").(uint)
-
-	if targetId != strconv.FormatUint(uint64(uId), 10) && c.Locals("role").(models.UserRole) != models.Admin {
-		return c.Status(fiber.StatusUnauthorized).JSON(web.User{
-			Status: fiber.StatusUnauthorized,
-			Errors: "Unauthorized",
-		})
-	}
 
 	var user models.User
 
@@ -111,6 +103,7 @@ func UpdateUserInfo(c *fiber.Ctx) error {
 			Errors: "Bad request",
 		})
 	}
+	fmt.Printf("", user)
 
 	if err := database.DB.Save(&user).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(web.User{

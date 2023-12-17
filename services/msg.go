@@ -15,6 +15,10 @@ import (
 	mw "webFinal/models/web"
 )
 
+type Message struct {
+	Content string `json:"content"`
+}
+
 func FindUserNameById(id uint) string {
 	var user models.User
 	db.DB.First(&user, id)
@@ -25,7 +29,7 @@ func FindUserNameById(id uint) string {
 // @description message api
 // @description user can send msg with name
 // @Produce json
-// @Success 200 {object} mw.Msg{data=string}
+// @Success 200 {object} mw.Msg{data=models.Msg}
 // @Param tid path string true "target id"
 // @Router /api/v1/msg/v1/send/{tid} [post]
 // @tags msg
@@ -38,10 +42,9 @@ func SendMsg(c *fiber.Ctx) error {
 			Errors: "target Id invalid",
 		})
 	}
+	var sentmsg Message
 
-	var message models.Msg
-
-	msg := c.FormValue("Content")
+	c.BodyParser(&sentmsg)
 
 	flag := c.Locals("role").(models.UserRole) >= models.Normal
 	if !flag {
@@ -51,15 +54,12 @@ func SendMsg(c *fiber.Ctx) error {
 		})
 	}
 
-	message.SendUserID = uid
-	message.ReceiveUserID = uint(tid)
-	message.Content = msg
+	var submit models.Msg
+	submit.SendUserID = uid
+	submit.ReceiveUserID = uint(tid)
+	submit.Content = sentmsg.Content
 
-	if err := db.DB.Create(&models.Msg{
-		SendUserID:    message.SendUserID,
-		ReceiveUserID: message.ReceiveUserID,
-		Content:       message.Content,
-	}).Error; err != nil {
+	if err := db.DB.Create(&submit).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(mw.Msg{
 			Status: fiber.StatusInternalServerError,
 			Errors: "Internal Server Error",
@@ -68,7 +68,7 @@ func SendMsg(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(mw.Msg{
 		Status: fiber.StatusOK,
-		Data:   message,
+		Data:   submit,
 	})
 }
 
@@ -76,7 +76,7 @@ func SendMsg(c *fiber.Ctx) error {
 // @description message api
 // @description user can get exist msg with target id
 // @Produce json
-// @Success 200 {object} mw.Msg{data=string}
+// @Success 200 {object} mw.Msg{data=[]models.Msg}
 // @Param tid path string true "target id"
 // @Router /api/v1/msg/v1/get/{tid} [get]
 // @tags msg
@@ -100,7 +100,7 @@ func GetMsgs(c *fiber.Ctx) error {
 		})
 	}
 
-	if err := db.DB.Where("send_user_id = ? AND receive_user_id = ?", uid, tid).Or("send_user_id = ? AND receive_user_id = ?", tid, uid).Find(&messages).Error; err != nil {
+	if err := db.DB.Where("send_user_id = ? AND receive_user_id = ? AND send_visible = 1 AND is_recall = 0", uid, tid).Or("send_user_id = ? AND receive_user_id = ? AND receive_visible = 1 AND is_recall = 0", tid, uid).Find(&messages).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(mw.Msg{
 			Status: fiber.StatusInternalServerError,
 			Errors: "Internal Server Error",
@@ -117,7 +117,7 @@ func GetMsgs(c *fiber.Ctx) error {
 // @description message api
 // @description user can get exist msg list
 // @Produce json
-// @Success 200 {object} mw.Msg{data=string}
+// @Success 200 {object} mw.Msg{data=[]web.MsgList}
 // @Router /api/v1/msg/v1/list [get]
 // @tags msg
 func ListMsgs(c *fiber.Ctx) error {
@@ -133,14 +133,15 @@ func ListMsgs(c *fiber.Ctx) error {
 		})
 	}
 
-	if err := db.DB.Where("send_user_id = ? OR receive_user_id = ?", uid, uid).Last(&messages).Error; err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(mw.Msg{
-			Status: fiber.StatusInternalServerError,
-			Errors: "Internal Server Error",
+	if err := db.DB.Where("send_user_id = ? OR receive_user_id = ?", uid, uid).Order("id desc").Find(&messages).Error; err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(mw.Msg{
+			Status: fiber.StatusNotFound,
+			Errors: "No message",
 		})
 	}
-
 	var result []mw.MsgList
+	var uniqueUsers = make(map[uint]bool)
+
 	for _, v := range messages {
 		var tmp mw.MsgList
 		if v.IsRecall == true {
@@ -150,12 +151,22 @@ func ListMsgs(c *fiber.Ctx) error {
 			if v.SendVisible == false {
 				continue
 			}
+			if _, ok := uniqueUsers[v.ReceiveUserID]; ok {
+				continue
+			}
 			tmp.Name = FindUserNameById(v.ReceiveUserID)
+			tmp.ID = v.ReceiveUserID
+			uniqueUsers[v.ReceiveUserID] = true
 		} else {
 			if v.ReceiveVisible == false {
 				continue
 			}
+			if _, ok := uniqueUsers[v.SendUserID]; ok {
+				continue
+			}
 			tmp.Name = FindUserNameById(v.SendUserID)
+			tmp.ID = v.SendUserID
+			uniqueUsers[v.SendUserID] = true
 		}
 		tmp.LatestMsg = v.Content
 		tmp.LatestMsgTime = strconv.FormatInt(v.SendTime, 10)
@@ -172,9 +183,9 @@ func ListMsgs(c *fiber.Ctx) error {
 // @description message api
 // @description user can delete exist msg with message id
 // @Produce json
-// @Success 200 {object} mw.Msg{data=string}
+// @Success 200 {object} mw.Msg{data=models.Msg}
 // @Param tid path string true "target id"
-// @Router /api/v1/msg/v1/delete/{tid} [get]
+// @Router /api/v1/msg/v1/delete/{mid} [get]
 // @tags msg
 func DeleteMsg(c *fiber.Ctx) error {
 	uid := c.Locals("sub").(uint)
@@ -213,10 +224,16 @@ func DeleteMsg(c *fiber.Ctx) error {
 			Errors: "Unauthorized",
 		})
 	}
+	if err := db.DB.Save(&message).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(mw.Msg{
+			Status: fiber.StatusInternalServerError,
+			Errors: "Internal Server Error",
+		})
+	}
 
 	return c.Status(fiber.StatusOK).JSON(mw.Msg{
 		Status: fiber.StatusOK,
-		Data:   message,
+		Data:   nil,
 	})
 }
 
@@ -225,7 +242,7 @@ func DeleteMsg(c *fiber.Ctx) error {
 // @description user can recall msg sent in 10 minutes
 // @Produce json
 // @Param tid path string true "target id"
-// @Success 200 {object} mw.Msg{data=string}
+// @Success 200 {object} mw.Msg{data=models.Msg}
 // @Router /api/v1/msg/v1/recall/{tid} [get]
 // @tags msg
 func RecallMsg(c *fiber.Ctx) error {
@@ -270,6 +287,13 @@ func RecallMsg(c *fiber.Ctx) error {
 	}
 
 	message.IsRecall = true
+
+	if err := db.DB.Save(&message).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(mw.Msg{
+			Status: fiber.StatusInternalServerError,
+			Errors: "Internal Server Error",
+		})
+	}
 
 	return c.Status(fiber.StatusOK).JSON(mw.Msg{
 		Status: fiber.StatusOK,

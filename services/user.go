@@ -115,7 +115,20 @@ func Register(c *fiber.Ctx) error {
 			"error": "user or pass is empty",
 		})
 	}
+
+	// check if user exist
 	var UserObject models.User
+
+	database.DB.Where("name = ?", name).First(&UserObject)
+	if UserObject.Name != "" {
+		return c.Status(fiber.StatusBadRequest).JSON(wb.User{
+			Status: fiber.StatusBadRequest,
+			Errors: "user already exist",
+			Data:   nil,
+		})
+	}
+
+	// create user
 	UserObject.Name = name
 	UserObject.Password = pass // For homework only, DO NOT USE IN PRODUCTION
 	UserObject.Role = models.Normal
@@ -139,5 +152,13 @@ func Register(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(wb.User{
 		Status: fiber.StatusOK,
 		Data:   token,
+	})
+}
+
+func WhoAmI(c *fiber.Ctx) error {
+	uid := c.Locals("sub").(uint)
+	return c.Status(fiber.StatusOK).JSON(wb.User{
+		Status: fiber.StatusOK,
+		Data:   uid,
 	})
 }

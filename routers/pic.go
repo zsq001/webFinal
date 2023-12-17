@@ -16,4 +16,5 @@ func SetupPicRouter(r fiber.Router) {
 	pic.Get("/list", services.GetUserPic)
 	pic.Post("/upload", services.UploadPic)
 	pic.Get("/delete/:uuid", services.DeleteUserPic)
+	pic.Get("/download/:uuid", services.DownloadPic)
 }

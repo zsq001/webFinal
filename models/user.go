@@ -15,7 +15,7 @@ type User struct {
 	Name     string
 	Role     UserRole
 	Pics     []Pic  `gorm:"foreignKey:UserID"`
-	Password string `gorm:"not null" json:"-"`
+	Password string `gorm:"not null"`
 }
 
 const (

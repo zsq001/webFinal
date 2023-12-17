@@ -26,4 +26,5 @@ func setupUserRouter(r fiber.Router) {
 	user.Get("/list", services.GetUserList)
 	user.Post("/update/:id", services.UpdateUserInfo)
 	user.Get("/delete/:id", services.DeleteUser)
+	user.Get("/whoami", services.WhoAmI)
 }

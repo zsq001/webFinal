@@ -49,7 +49,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "string"
+                                            "$ref": "#/definitions/models.Msg"
                                         }
                                     }
                                 }
@@ -90,7 +90,10 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "string"
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.Msg"
+                                            }
                                         }
                                     }
                                 }
@@ -122,7 +125,10 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "string"
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/web.MsgList"
+                                            }
                                         }
                                     }
                                 }
@@ -163,7 +169,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "string"
+                                            "$ref": "#/definitions/models.Msg"
                                         }
                                     }
                                 }
@@ -204,7 +210,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "string"
+                                            "$ref": "#/definitions/models.Msg"
                                         }
                                     }
                                 }
@@ -495,6 +501,25 @@ const docTemplate = `{
                 }
             }
         },
+        "/pic/download/{uuid}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "pic"
+                ],
+                "summary": "Download pic",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "formData"
+                        }
+                    }
+                }
+            }
+        },
         "/pic/list/": {
             "get": {
                 "consumes": [
@@ -686,6 +711,44 @@ const docTemplate = `{
                 }
             }
         },
+        "models.Msg": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isRecall": {
+                    "type": "boolean"
+                },
+                "receiveUserID": {
+                    "type": "integer"
+                },
+                "receiveVisible": {
+                    "type": "boolean"
+                },
+                "sendTime": {
+                    "type": "integer"
+                },
+                "sendUserID": {
+                    "type": "integer"
+                },
+                "sendVisible": {
+                    "type": "boolean"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
         "models.Pic": {
             "type": "object",
             "properties": {
@@ -724,6 +787,20 @@ const docTemplate = `{
                 },
                 "status": {
                     "type": "integer"
+                }
+            }
+        },
+        "web.MsgList": {
+            "type": "object",
+            "properties": {
+                "latest_msg": {
+                    "type": "string"
+                },
+                "latest_msg_time": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         },
