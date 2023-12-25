@@ -46,10 +46,7 @@ func SaveJWTtoLocal(c *fiber.Ctx) error {
 // @Param user formData string true "user name"
 // @Param pass formData string true "user password"
 // @Produce json
-// @Success 200 {object} wb.User{data=string}
-// @Failure 400 {object} wb.User{data=int}
-// @Failure 401 {object} wb.User{data=int}
-// @Failure 500 {object} wb.User{data=int}
+// @Success 200 {object} wb.User{data=wb.User}
 // @Router /api/v1/user/login [post]
 // @tags user
 func Login(c *fiber.Ctx) error {
@@ -101,10 +98,7 @@ func Login(c *fiber.Ctx) error {
 // @Param user formData string true "user name"
 // @Param pass formData string true "user password"
 // @Produce json
-// @Success 200 {object} wb.User{data=string}
-// @Failure 400 {object} wb.User{data=int}
-// @Failure 401 {object} wb.User{data=int}
-// @Failure 500 {object} wb.User{data=int}
+// @Success 200 {object} wb.User{data=wb.User}
 // @Router /api/v1/user/register [post]
 // @tags user
 func Register(c *fiber.Ctx) error {
@@ -155,6 +149,13 @@ func Register(c *fiber.Ctx) error {
 	})
 }
 
+// @Summary check id
+// @description check id api
+// @description user can check id of themselves
+// @Produce json
+// @Success 200 {object} wb.User{data=wb.User}
+// @Router /api/v1/user/whoami [get]
+// @tags user
 func WhoAmI(c *fiber.Ctx) error {
 	uid := c.Locals("sub").(uint)
 	return c.Status(fiber.StatusOK).JSON(wb.User{

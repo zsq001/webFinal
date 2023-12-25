@@ -6,6 +6,8 @@
 
 package web
 
+import "webFinal/models"
+
 type User struct {
 	Status int         `json:"status,omitempty"`
 	Errors string      `json:"error,omitempty"`
@@ -13,7 +15,7 @@ type User struct {
 }
 
 type UserInfo struct {
-	ID       uint   `json:"id"`
-	Username string `json:"name"`
-	Role     string `json:"role"`
+	ID       uint            `json:"id"`
+	Username string          `json:"name"`
+	Role     models.UserRole `json:"role"`
 }

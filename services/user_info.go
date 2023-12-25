@@ -7,7 +7,6 @@
 package services
 
 import (
-	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"os"
 	"strconv"
@@ -58,7 +57,7 @@ func GetUserInfo(c *fiber.Ctx) error {
 		})
 	}
 
-	result.Role = strconv.FormatInt(int64(user.Role), 10)
+	result.Role = (user.Role)
 	result.Username = user.Name
 	result.ID = user.ID
 
@@ -103,8 +102,6 @@ func UpdateUserInfo(c *fiber.Ctx) error {
 			Errors: "Bad request",
 		})
 	}
-	fmt.Printf("", user)
-
 	if err := database.DB.Save(&user).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(web.User{
 			Status: fiber.StatusInternalServerError,
@@ -112,7 +109,7 @@ func UpdateUserInfo(c *fiber.Ctx) error {
 		})
 	}
 
-	result.Role = strconv.FormatInt(int64(user.Role), 10)
+	result.Role = (user.Role)
 	result.Username = user.Name
 	result.ID = user.ID
 
@@ -129,7 +126,7 @@ func UpdateUserInfo(c *fiber.Ctx) error {
 // @Success 200 {object} []web.User{data=web.UserInfo}
 func GetUserList(c *fiber.Ctx) error {
 	var users []models.User
-	var result []web.UserInfo
+	//var result []web.UserInfo
 
 	if c.Locals("role").(models.UserRole) != models.Admin {
 		return c.Status(fiber.StatusUnauthorized).JSON(web.User{
@@ -144,15 +141,11 @@ func GetUserList(c *fiber.Ctx) error {
 			Errors: "Database error",
 		})
 	}
-	for i := range users {
-		result[i].Role = strconv.FormatInt(int64(users[i].Role), 10)
-		result[i].Username = users[i].Name
-		result[i].ID = users[i].ID
-	}
+	//fmt.Printf("", users)
 
 	return c.Status(fiber.StatusOK).JSON(web.User{
 		Status: fiber.StatusOK,
-		Data:   result,
+		Data:   users,
 	})
 }
 

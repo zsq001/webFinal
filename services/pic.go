@@ -156,18 +156,6 @@ func GetUserPic(c *fiber.Ctx) error {
 
 	var pictures []models.Pic
 
-	if c.Locals("role").(models.UserRole) == models.Admin {
-		if err := db.DB.Find(&pictures).Error; err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(web.Pic{
-				Status: fiber.StatusInternalServerError,
-				Errors: err.Error(),
-			})
-		}
-		return c.Status(fiber.StatusOK).JSON(web.Pic{
-			Status: fiber.StatusOK,
-			Data:   pictures,
-		})
-	}
 	db.DB.Where("user_id = ?", uId).Find(&pictures)
 
 	return c.Status(fiber.StatusOK).JSON(web.Pic{
@@ -201,5 +189,32 @@ func DownloadPic(c *fiber.Ctx) error {
 		})
 	}
 
+	c.Set("Content-Disposition", "attachment; filename="+pic.Name)
+	c.Set("Content-Type", "application/octet-stream")
+
 	return c.SendFile("./static/" + pic.UUID)
+}
+
+// @Summary List all user pic (admin only)
+// @Tags pic
+// @Produce json
+// @router /pic/list/all [get]
+// @Success 200 {object} web.Pic{data=[]models.Pic}
+func ListAllUserPic(c *fiber.Ctx) error {
+	//uId := c.Locals("sub").(uint)
+
+	var pictures []models.Pic
+
+	if c.Locals("role").(models.UserRole) != models.Admin {
+		return c.Status(fiber.StatusForbidden).JSON(web.Pic{
+			Status: fiber.StatusForbidden,
+			Errors: "Permission denied",
+		})
+	}
+	db.DB.Find(&pictures)
+
+	return c.Status(fiber.StatusOK).JSON(web.Pic{
+		Status: fiber.StatusOK,
+		Data:   pictures,
+	})
 }

@@ -18,7 +18,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/v1/msg/v1/delete/{tid}": {
+        "/api/v1/msg/v1/delete/{mid}": {
             "get": {
                 "description": "message api\nuser can delete exist msg with message id",
                 "produces": [
@@ -258,61 +258,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/web.User"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "integer"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/web.User"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "integer"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/web.User"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "integer"
+                                            "$ref": "#/definitions/web.User"
                                         }
                                     }
                                 }
@@ -360,15 +306,29 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "string"
+                                            "$ref": "#/definitions/web.User"
                                         }
                                     }
                                 }
                             ]
                         }
-                    },
-                    "400": {
-                        "description": "Bad Request",
+                    }
+                }
+            }
+        },
+        "/api/v1/user/whoami": {
+            "get": {
+                "description": "check id api\nuser can check id of themselves",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "check id",
+                "responses": {
+                    "200": {
+                        "description": "OK",
                         "schema": {
                             "allOf": [
                                 {
@@ -378,43 +338,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "integer"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/web.User"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "integer"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/web.User"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "integer"
+                                            "$ref": "#/definitions/web.User"
                                         }
                                     }
                                 }
@@ -532,6 +456,40 @@ const docTemplate = `{
                     "pic"
                 ],
                 "summary": "Get user pic",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/web.Pic"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.Pic"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/pic/list/all": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "pic"
+                ],
+                "summary": "List all user pic (admin only)",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -778,6 +736,17 @@ const docTemplate = `{
                 }
             }
         },
+        "models.UserRole": {
+            "type": "integer",
+            "enum": [
+                0,
+                1
+            ],
+            "x-enum-varnames": [
+                "Normal",
+                "Admin"
+            ]
+        },
         "web.Msg": {
             "type": "object",
             "properties": {
@@ -793,6 +762,9 @@ const docTemplate = `{
         "web.MsgList": {
             "type": "object",
             "properties": {
+                "ID": {
+                    "type": "integer"
+                },
                 "latest_msg": {
                     "type": "string"
                 },
@@ -838,7 +810,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "role": {
-                    "type": "string"
+                    "$ref": "#/definitions/models.UserRole"
                 }
             }
         }

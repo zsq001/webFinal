@@ -37,7 +37,10 @@ func main() {
 
 	app := fiber.New(fiber.Config{})
 
-	app.Use(cors.New())
+	app.Use(cors.New(cors.Config{
+		AllowHeaders:  "Authorization,Origin,Content-Type,Accept",
+		ExposeHeaders: "Content-Disposition",
+	}))
 
 	routers.InitRouter(app)
 
