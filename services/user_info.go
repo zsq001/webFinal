@@ -50,7 +50,7 @@ func GetUserInfo(c *fiber.Ctx) error {
 
 	var result web.UserInfo
 
-	if err := database.DB.Where("id = ?", targetId).First(&user).Error; err != nil {
+	if err := database.DB.Where("id = ?", targetId).Or("name = ?", targetId).First(&user).Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(web.User{
 			Status: fiber.StatusNotFound,
 			Errors: "User not found",

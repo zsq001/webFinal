@@ -9,6 +9,7 @@ package services
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
+	"strconv"
 	"time"
 	"webFinal/config"
 	"webFinal/database"
@@ -38,6 +39,13 @@ func SaveJWTtoLocal(c *fiber.Ctx) error {
 		c.Locals("role", models.UserRole(claims["role"].(float64)))
 	}
 	return c.Next()
+}
+
+func isNumeric(str string) bool {
+	_, errInt := strconv.Atoi(str)             // 尝试将字符串转为整数
+	_, errFloat := strconv.ParseFloat(str, 64) // 尝试将字符串转为浮点数
+
+	return errInt == nil || errFloat == nil
 }
 
 // @Summary Login
@@ -107,6 +115,11 @@ func Register(c *fiber.Ctx) error {
 	if name == "" || pass == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "user or pass is empty",
+		})
+	}
+	if isNumeric(name) {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "user name can't be number",
 		})
 	}
 
